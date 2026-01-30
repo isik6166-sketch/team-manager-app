@@ -3,58 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TEAM ISIK | Digital</title>
+    <title>TEAM ISIK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; background: #000; color: white; margin: 0; min-height: 100vh; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .red-gradient { background: linear-gradient(135deg, #ff1f1f 0%, #8b0000 100%); }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; overflow-x: hidden; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .red-btn { background: linear-gradient(135deg, #ff1f1f 0%, #8b0000 100%); }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <div id="login-view" class="flex flex-col items-center justify-center min-h-screen p-8 text-center">
+        <div class="text-4xl mb-4">🌍</div>
+        <h1 class="text-5xl font-black italic mb-2 tracking-tighter uppercase">TEAM<span class="text-red-600">ISIK</span></h1>
+        <div id="login-clock" class="text-zinc-500 font-mono text-sm mb-10 tracking-widest">00:00:00</div>
+        
+        <div class="glass w-full max-w-sm p-8 rounded-[40px]">
+            <input id="email-input" type="email" placeholder="E-Mail Adresse" class="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white outline-none mb-4 focus:border-red-600">
+            <button onclick="handleLogin()" class="w-full red-btn text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">ANMELDEN</button>
+        </div>
+    </div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6dBTPMI6VMgwppjOpKhGF1dwJRWq5A_zlnLltKHGVkmpBwQW6FD_gdaZHhgxnuBNCDw/exec';
-        const ADMIN_EMAIL = 'isik6166@hotmail.com';
+    <div id="dashboard-view" class="hidden max-w-md mx-auto p-6">
+        <header class="mt-8 mb-8 flex justify-between items-center">
+            <div>
+                <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Workspace</p>
+                <h2 id="user-display" class="text-3xl font-black tracking-tighter">USER</h2>
+            </div>
+            <div id="dash-clock" class="text-red-600 font-mono font-bold text-sm text-right">00:00:00</div>
+        </header>
 
-        function App() {
-            const [view, setView] = useState('login');
-            const [email, setEmail] = useState('');
-            const [allUsers, setAllUsers] = useState([]);
-            const [currentUserData, setCurrentUserData] = useState({ Resturlaub: '--', Kranktage: '--' });
-            const [time, setTime] = useState(new Date().toLocaleTimeString('de-DE'));
+        <div class="grid grid-cols-2 gap-4 mb-8 text-center">
+            <div class="glass p-6 rounded-[32px] border-b-4 border-red-600">
+                <p class="text-zinc-500 text-[10px] font-bold uppercase mb-1">Resturlaub</p>
+                <span id="vacation-days" class="text-4xl font-black">--</span>
+            </div>
+            <div class="glass p-6 rounded-[32px] opacity-60 text-zinc-500">
+                <p class="text-[10px] font-bold uppercase mb-1">Kranktage</p>
+                <span class="text-4xl font-black">0</span>
+            </div>
+        </div>
 
-            // Saati her saniye güncelle (Hatasız versiyon)
-            useEffect(() => {
-                const timer = setInterval(() => {
-                    setTime(new Date().toLocaleTimeString('de-DE'));
-                }, 1000);
-                return () => clearInterval(timer);
-            }, []);
-
-            const fetchData = async () => {
-                try {
-                    const res = await fetch(SCRIPT_URL);
-                    const data = await res.json();
-                    setAllUsers(data);
-                    const found = data.find(u => u.Email?.toLowerCase() === email.toLowerCase());
-                    if (found) setCurrentUserData(found);
-                } catch (e) { console.log("Data error"); }
-            };
-
-            useEffect(() => { if (view !== 'login') fetchData(); }, [view]);
-
-            const handleLogin = (e) => {
-                e.preventDefault();
-                if(email.includes('@')) setView('dashboard');
-            };
-
-            const sendRequest = async (typ) => {
-                alert(typ + " wird gesendet...");
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: '
+        <div class="space-y-4 mb-8">
+            <button onclick="sendRequest('Urlaub')" class="w-full red-btn p-6 rounded-3xl text-white font-black flex justify-between items-center active:scale-95 transition-all">URLAUB BEANTRAGEN <span>→</span></button>
+            <button onclick="sendRequest('Krank')" class="w-full glass p-6 rounded-3xl text-white font-bold flex justify-between items-
