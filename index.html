@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TEAM ISIK | Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top right, #1a1a1a, #000000); color: white; margin: 0; min-height: 100vh; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        body { font-family: sans-serif; background: #000; color: white; margin: 0; min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .red-gradient { background: linear-gradient(135deg, #ff1f1f 0%, #8b0000 100%); }
-        .time-glow { text-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
     </style>
 </head>
 <body>
@@ -30,25 +28,24 @@
             const [email, setEmail] = useState('');
             const [allUsers, setAllUsers] = useState([]);
             const [currentUserData, setCurrentUserData] = useState({ Resturlaub: '--', Kranktage: '--' });
-            const [loading, setLoading] = useState(false);
-            const [now, setNow] = useState(new Date());
+            const [time, setTime] = useState(new Date().toLocaleTimeString('de-DE'));
 
-            // Saat ve Tarih Güncelleme
+            // Saati her saniye güncelle (Hatasız versiyon)
             useEffect(() => {
-                const timer = setInterval(() => setNow(new Date()), 1000);
+                const timer = setInterval(() => {
+                    setTime(new Date().toLocaleTimeString('de-DE'));
+                }, 1000);
                 return () => clearInterval(timer);
             }, []);
 
             const fetchData = async () => {
-                setLoading(true);
                 try {
                     const res = await fetch(SCRIPT_URL);
                     const data = await res.json();
                     setAllUsers(data);
                     const found = data.find(u => u.Email?.toLowerCase() === email.toLowerCase());
                     if (found) setCurrentUserData(found);
-                } catch (e) { console.error("Data error"); }
-                setLoading(false);
+                } catch (e) { console.log("Data error"); }
             };
 
             useEffect(() => { if (view !== 'login') fetchData(); }, [view]);
@@ -60,41 +57,4 @@
 
             const sendRequest = async (typ) => {
                 alert(typ + " wird gesendet...");
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'add', email: email, typ: typ }) });
-                alert("Erfolgreich gesendet!");
-            };
-
-            const formatTime = (date) => date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const formatDate = (date) => date.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long', year: 'numeric' });
-
-            if (view === 'login') {
-                return (
-                    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-                        <div className="mb-4 text-4xl">🌍</div>
-                        <h1 className="text-5xl font-extrabold italic mb-2 uppercase tracking-tighter">TEAM<span className="text-red-600">ISIK</span></h1>
-                        <div className="text-zinc-500 font-mono text-sm mb-12 time-glow">
-                            {formatDate(now)} | {formatTime(now)}
-                        </div>
-                        
-                        <div className="glass w-full max-w-sm p-8 rounded-[40px]">
-                            <p className="text-zinc-400 text-[10px] text-center mb-8 uppercase tracking-widest italic font-bold">Logistics Management</p>
-                            <form onSubmit={handleLogin} className="space-y-6">
-                                <input type="email" placeholder="E-Mail Adresse" className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white outline-none focus:border-red-600 transition-all shadow-inner" onChange={(e) => setEmail(e.target.value.toLowerCase().trim())} required />
-                                <button className="w-full red-gradient text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-900/40 active:scale-95 transition-all">ANMELDEN</button>
-                            </form>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (view === 'admin') {
-                return (
-                    <div className="p-6 max-w-md mx-auto pb-20">
-                        <button onClick={() => setView('dashboard')} className="text-zinc-500 mb-6 font-bold flex items-center gap-2"><span>←</span> Zurück</button>
-                        <h2 className="text-2xl font-black mb-6 text-red-600 uppercase italic">Team Übersicht</h2>
-                        <div className="space-y-3">
-                            {allUsers.map((u, i) => (
-                                <div key={i} className="glass p-5 rounded-[24px] flex justify-between items-center border-l-2 border-l-red-600">
-                                    <div>
-                                        <p className="font-bold text-sm">{u.Name || 'Unbekannt'}</p>
-                                        <p className="text-
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: '
