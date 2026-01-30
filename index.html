@@ -3,34 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TEAM ISIK | Pro</title>
+    <title>TEAM ISIK | Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: radial-gradient(circle at top right, #1a1a1a, #000000);
-            color: white; 
-            margin: 0; 
-            min-height: 100vh;
-        }
-        .glass { 
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .red-gradient {
-            background: linear-gradient(135deg, #ff1f1f 0%, #8b0000 100%);
-        }
-        .admin-card {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top right, #1a1a1a, #000000); color: white; margin: 0; min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .red-gradient { background: linear-gradient(135deg, #ff1f1f 0%, #8b0000 100%); }
     </style>
 </head>
 <body>
@@ -42,108 +21,118 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6dBTPMI6VMgwppjOpKhGF1dwJRWq5A_zlnLltKHGVkmpBwQW6FD_gdaZHhgxnuBNCDw/exec';
         const ADMIN_EMAIL = 'isik6166@hotmail.com';
 
         function App() {
             const [view, setView] = useState('login');
             const [email, setEmail] = useState('');
+            const [allUsers, setAllUsers] = useState([]);
+            const [currentUserData, setCurrentUserData] = useState({ Resturlaub: '--', Kranktage: '--' });
+            const [loading, setLoading] = useState(false);
+
+            // Verileri Google Sheet'ten Çek
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    const res = await fetch(SCRIPT_URL);
+                    const data = await res.json();
+                    setAllUsers(data);
+                    
+                    // Giriş yapan kullanıcının verisini bul
+                    const found = data.find(u => u.Email?.toLowerCase() === email.toLowerCase());
+                    if (found) setCurrentUserData(found);
+                } catch (e) { console.error("Veri çekilemedi"); }
+                setLoading(false);
+            };
+
+            useEffect(() => {
+                if (view !== 'login') fetchData();
+            }, [view]);
 
             const handleLogin = (e) => {
                 e.preventDefault();
                 if(email.includes('@')) setView('dashboard');
             };
 
+            const sendRequest = async (typ) => {
+                alert(typ + " Talebi Gönderiliyor...");
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: 'add', email: email, typ: typ })
+                });
+                alert("Başarıyla Gönderildi!");
+            };
+
             if (view === 'login') {
                 return (
-                    <div className="relative flex flex-col items-center justify-center min-h-screen p-8">
-                        <div className="absolute top-20 w-64 h-64 bg-red-600/10 rounded-full blur-[100px] animate-pulse"></div>
-                        
-                        <div className="relative mb-12 text-center">
-                            <h1 className="text-6xl font-extrabold tracking-tighter italic text-white mb-2">
-                                TEAM<span className="text-red-600">ISIK</span>
-                            </h1>
-                            <div className="h-1 w-20 bg-red-600 mx-auto rounded-full"></div>
-                        </div>
-
-                        <div className="glass w-full max-w-sm p-8 rounded-[40px] shadow-2xl">
-                            <p className="text-zinc-400 text-sm text-center mb-8 italic">
-                                "Together Everyone Achieves More"
-                            </p>
-                            
+                    <div className="flex flex-col items-center justify-center min-h-screen p-8">
+                        <h1 className="text-6xl font-extrabold italic mb-12 uppercase tracking-tighter">TEAM<span className="text-red-600">ISIK</span></h1>
+                        <div className="glass w-full max-w-sm p-8 rounded-[40px]">
                             <form onSubmit={handleLogin} className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-zinc-500 uppercase ml-2">E-Mail Access</label>
-                                    <input 
-                                        type="email" 
-                                        placeholder="name@isik.com" 
-                                        className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all placeholder:text-zinc-700"
-                                        onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
-                                        required 
-                                    />
-                                </div>
-                                <button className="w-full red-gradient text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-900/40 active:scale-[0.98] transition-all">
-                                    LOGIN
-                                </button>
+                                <input type="email" placeholder="E-Mail Access" className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white outline-none focus:border-red-600" onChange={(e) => setEmail(e.target.value.toLowerCase().trim())} required />
+                                <button className="w-full red-gradient text-white font-bold py-4 rounded-2xl active:scale-95 transition-all">LOGIN</button>
                             </form>
                         </div>
                     </div>
                 );
             }
 
+            if (view === 'admin') {
+                return (
+                    <div className="p-6 max-w-md mx-auto">
+                        <button onClick={() => setView('dashboard')} className="text-zinc-500 mb-6 font-bold">← Geri Dön</button>
+                        <h2 className="text-2xl font-black mb-6 text-red-600 uppercase">Ekip Listesi</h2>
+                        <div className="space-y-4">
+                            {allUsers.map((u, i) => (
+                                <div key={i} className="glass p-4 rounded-2xl flex justify-between items-center">
+                                    <div>
+                                        <p className="font-bold">{u.Name || 'Adsız'}</p>
+                                        <p className="text-[10px] text-zinc-500">{u.Email}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-red-500 font-bold">{u.Resturlaub} Gün</p>
+                                        <p className="text-[10px] text-zinc-600 italic">Kalan İzin</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+
             return (
-                <div className="max-w-md mx-auto min-h-screen p-6 pb-20">
-                    <header className="flex justify-between items-center mt-8 mb-12">
+                <div className="max-w-md mx-auto p-6">
+                    <header className="mt-8 mb-12 flex justify-between items-center">
                         <div>
-                            <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Workspace</p>
-                            <h2 className="text-3xl font-extrabold tracking-tight">
-                                {email === ADMIN_EMAIL ? "PATRON" : email.split('@')[0].toUpperCase()}
-                            </h2>
+                            <p className="text-zinc-500 text-xs font-bold uppercase">TEAM ISIK</p>
+                            <h2 className="text-3xl font-extrabold">{email === ADMIN_EMAIL ? "PATRON" : email.split('@')[0].toUpperCase()}</h2>
                         </div>
-                        <div className="w-12 h-12 rounded-full red-gradient flex items-center justify-center font-bold border-2 border-white/10">
-                            {email[0].toUpperCase()}
-                        </div>
+                        <button onClick={fetchData} className="p-2 glass rounded-full text-xs">🔄</button>
                     </header>
 
                     <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="glass p-6 rounded-[32px] relative overflow-hidden">
-                            <div className="absolute -right-2 -top-2 w-12 h-12 bg-red-600/10 rounded-full blur-xl"></div>
-                            <p className="text-zinc-500 text-xs mb-1 font-bold uppercase">Resturlaub</p>
-                            <span className="text-4xl font-extrabold text-white">24</span>
-                            <p className="text-[10px] text-zinc-400 mt-2">Tage verfügbar</p>
+                        <div className="glass p-6 rounded-[32px]">
+                            <p className="text-zinc-500 text-xs font-bold uppercase">Resturlaub</p>
+                            <span className="text-4xl font-black text-white">{currentUserData.Resturlaub}</span>
                         </div>
                         <div className="glass p-6 rounded-[32px] opacity-60">
-                            <p className="text-zinc-500 text-xs mb-1 font-bold uppercase">Krankheit</p>
-                            <span className="text-4xl font-extrabold text-white">0</span>
-                            <p className="text-[10px] text-zinc-400 mt-2">Aktueller Stand</p>
+                            <p className="text-zinc-500 text-xs font-bold uppercase">Krankheit</p>
+                            <span className="text-4xl font-black text-white">{currentUserData.Kranktage}</span>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
-                        <button className="w-full red-gradient p-6 rounded-3xl text-white font-bold flex justify-between items-center shadow-xl active:scale-[0.97] transition-all">
-                            <span className="tracking-tight">URLAUB BEANTRAGEN</span>
-                            <span className="bg-white/20 p-2 rounded-xl">→</span>
-                        </button>
-                        <button className="w-full glass p-6 rounded-3xl text-white/80 font-bold flex justify-between items-center active:scale-[0.97] transition-all border-white/5">
-                            <span className="tracking-tight text-sm">KRANKMELDUNG</span>
-                            <span className="text-zinc-600 italic text-xs">Senden</span>
-                        </button>
+                    <div className="space-y-4 mb-12">
+                        <button onClick={() => sendRequest('Urlaub')} className="w-full red-gradient p-6 rounded-3xl text-white font-bold flex justify-between items-center active:scale-95 transition-all">URLAUB BEANTRAGEN <span>→</span></button>
+                        <button onClick={() => sendRequest('Krank')} className="w-full glass p-6 rounded-3xl text-white/80 font-bold flex justify-between items-center active:scale-95 transition-all">KRANKMELDUNG <span>→</span></button>
                     </div>
 
                     {email === ADMIN_EMAIL && (
-                        <div className="mt-12 p-6 admin-card rounded-[32px] animate-float">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-2 h-2 bg-red-600 rounded-full animate-ping"></div>
-                                <h3 className="text-red-600 font-extrabold text-sm uppercase tracking-tighter">Admin Dashboard</h3>
-                            </div>
-                            <button className="w-full py-3 bg-red-600/20 hover:bg-red-600/30 border border-red-600/40 rounded-xl text-red-500 text-xs font-bold transition-all">
-                                EKİBİ YÖNET & TALEPLERİ GÖR
-                            </button>
-                        </div>
+                        <button onClick={() => setView('admin')} className="w-full p-6 rounded-[32px] border-2 border-red-600/30 bg-red-600/5 text-red-500 font-black tracking-tighter uppercase text-sm animate-pulse">
+                            🔒 Admin Panel: Ekibi Yönet
+                        </button>
                     )}
-                    
-                    <footer className="mt-12 text-center">
-                        <p className="text-zinc-800 text-[10px] font-black tracking-[0.4em] uppercase">TEAM ISIK PREMIUM v2.0</p>
-                    </footer>
                 </div>
             );
         }
