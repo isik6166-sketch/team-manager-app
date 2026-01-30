@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TEAM ISIK | Logistics</title>
+    <title>TEAM ISIK | Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top right, #1a1a1a, #000000); color: white; margin: 0; min-height: 100vh; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .red-gradient { background: linear-gradient(135deg, #ff1f1f 0%, #8b0000 100%); }
-        .truck-icon { font-size: 50px; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5)); }
+        .time-glow { text-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
     </style>
 </head>
 <body>
@@ -31,6 +31,13 @@
             const [allUsers, setAllUsers] = useState([]);
             const [currentUserData, setCurrentUserData] = useState({ Resturlaub: '--', Kranktage: '--' });
             const [loading, setLoading] = useState(false);
+            const [now, setNow] = useState(new Date());
+
+            // Saat ve Tarih Güncelleme
+            useEffect(() => {
+                const timer = setInterval(() => setNow(new Date()), 1000);
+                return () => clearInterval(timer);
+            }, []);
 
             const fetchData = async () => {
                 setLoading(true);
@@ -44,9 +51,7 @@
                 setLoading(false);
             };
 
-            useEffect(() => {
-                if (view !== 'login') fetchData();
-            }, [view]);
+            useEffect(() => { if (view !== 'login') fetchData(); }, [view]);
 
             const handleLogin = (e) => {
                 e.preventDefault();
@@ -55,29 +60,26 @@
 
             const sendRequest = async (typ) => {
                 alert(typ + " wird gesendet...");
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: 'add', email: email, typ: typ })
-                });
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'add', email: email, typ: typ }) });
                 alert("Erfolgreich gesendet!");
             };
+
+            const formatTime = (date) => date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const formatDate = (date) => date.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'long', year: 'numeric' });
 
             if (view === 'login') {
                 return (
                     <div className="flex flex-col items-center justify-center min-h-screen p-8">
-                        <div className="mb-6 flex gap-4 items-center">
-                            <span className="truck-icon">🚚</span>
-                            <span className="text-4xl text-zinc-800">|</span>
-                            <span className="truck-icon">🌍</span>
-                        </div>
+                        <div className="mb-4 text-4xl">🌍</div>
                         <h1 className="text-5xl font-extrabold italic mb-2 uppercase tracking-tighter">TEAM<span className="text-red-600">ISIK</span></h1>
-                        <p className="text-zinc-500 text-[10px] tracking-[0.3em] mb-10 uppercase">Logistics & Management</p>
+                        <div className="text-zinc-500 font-mono text-sm mb-12 time-glow">
+                            {formatDate(now)} | {formatTime(now)}
+                        </div>
                         
                         <div className="glass w-full max-w-sm p-8 rounded-[40px]">
-                            <p className="text-zinc-400 text-xs text-center mb-8 italic">„TEAM- Together Everyone Achieves More“</p>
+                            <p className="text-zinc-400 text-[10px] text-center mb-8 uppercase tracking-widest italic font-bold">Logistics Management</p>
                             <form onSubmit={handleLogin} className="space-y-6">
-                                <input type="email" placeholder="E-Mail Adresse" className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white outline-none focus:border-red-600 placeholder:text-zinc-600" onChange={(e) => setEmail(e.target.value.toLowerCase().trim())} required />
+                                <input type="email" placeholder="E-Mail Adresse" className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white outline-none focus:border-red-600 transition-all shadow-inner" onChange={(e) => setEmail(e.target.value.toLowerCase().trim())} required />
                                 <button className="w-full red-gradient text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-900/40 active:scale-95 transition-all">ANMELDEN</button>
                             </form>
                         </div>
@@ -90,74 +92,9 @@
                     <div className="p-6 max-w-md mx-auto pb-20">
                         <button onClick={() => setView('dashboard')} className="text-zinc-500 mb-6 font-bold flex items-center gap-2"><span>←</span> Zurück</button>
                         <h2 className="text-2xl font-black mb-6 text-red-600 uppercase italic">Team Übersicht</h2>
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {allUsers.map((u, i) => (
-                                <div key={i} className="glass p-5 rounded-[24px] flex justify-between items-center border-l-4 border-l-red-600">
+                                <div key={i} className="glass p-5 rounded-[24px] flex justify-between items-center border-l-2 border-l-red-600">
                                     <div>
                                         <p className="font-bold text-sm">{u.Name || 'Unbekannt'}</p>
-                                        <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">{u.Email}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-white font-black text-lg">{u.Resturlaub}</p>
-                                        <p className="text-[9px] text-zinc-500 uppercase">Urlaubstage</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="max-w-md mx-auto p-6 pb-24">
-                    <header className="mt-8 mb-12 flex justify-between items-center">
-                        <div>
-                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Workspace</p>
-                            <h2 className="text-3xl font-extrabold tracking-tight">{email === ADMIN_EMAIL ? "ADMIN PANEL" : email.split('@')[0].toUpperCase()}</h2>
-                        </div>
-                        <button onClick={fetchData} className={`w-10 h-10 glass rounded-full flex items-center justify-center ${loading ? 'animate-spin' : ''}`}>🔄</button>
-                    </header>
-
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="glass p-6 rounded-[32px] border-b-2 border-b-red-600/50">
-                            <p className="text-zinc-500 text-[10px] font-bold uppercase mb-1">Resturlaub</p>
-                            <span className="text-4xl font-black text-white">{currentUserData.Resturlaub}</span>
-                            <p className="text-[9px] text-zinc-600 mt-1">Tage übrig</p>
-                        </div>
-                        <div className="glass p-6 rounded-[32px] opacity-50">
-                            <p className="text-zinc-500 text-[10px] font-bold uppercase mb-1">Kranktage</p>
-                            <span className="text-4xl font-black text-white">{currentUserData.Kranktage}</span>
-                            <p className="text-[9px] text-zinc-600 mt-1">Gesamt</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 mb-12">
-                        <button onClick={() => sendRequest('Urlaub')} className="w-full red-gradient p-6 rounded-3xl text-white font-bold flex justify-between items-center shadow-xl active:scale-95 transition-all">
-                            <span className="tracking-tighter">URLAUB BEANTRAGEN</span>
-                            <span className="bg-black/20 px-3 py-1 rounded-lg">→</span>
-                        </button>
-                        <button onClick={() => sendRequest('Krank')} className="w-full glass p-6 rounded-3xl text-white/80 font-bold flex justify-between items-center active:scale-95 transition-all">
-                            <span className="tracking-tighter uppercase text-sm">Krankmeldung</span>
-                            <span className="text-zinc-700 font-black">!</span>
-                        </button>
-                    </div>
-
-                    {email === ADMIN_EMAIL && (
-                        <button onClick={() => setView('admin')} className="w-full p-6 rounded-[32px] border-2 border-red-600/30 bg-red-600/5 text-red-500 font-black tracking-tighter uppercase text-xs flex justify-between items-center hover:bg-red-600/10 transition-all">
-                            <span>📦 Team-Verwaltung & Logistik</span>
-                            <span className="text-xl">⚙️</span>
-                        </button>
-                    )}
-
-                    <footer className="mt-16 text-center opacity-20">
-                        <p className="text-[10px] font-black tracking-[0.5em] uppercase text-white">Team Isik v2.5 Premium</p>
-                    </footer>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+                                        <p className="text-
