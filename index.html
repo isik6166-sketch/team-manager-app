@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeamManager App</title>
+    <title>TEAM ISIK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: black; color: white; margin: 0; }
         .bg-zinc-900 { background-color: #18181b; }
+        .text-red-custom { color: #ef4444; }
+        .bg-red-custom { background-color: #ef4444; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
     </style>
 </head>
@@ -18,22 +20,18 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2dzzspz7RUYpZ_pB-nHY48O2Q0q5-p6yuEzAb1ect3QnUqsHWICwyuzwiT7olmbMzcw/exec';
 
         const App = () => {
             const [view, setView] = useState('login');
             const [email, setEmail] = useState('');
-            const [user, setUser] = useState({ name: 'Mitarbeiter', resturlaub: 24, kranktage: 0 });
 
             const handleLogin = (e) => {
                 e.preventDefault();
-                if(email.includes('@')) {
-                    setView('dashboard');
-                }
+                if(email.includes('@')) setView('dashboard');
             };
 
             const sendData = async (typ) => {
@@ -43,60 +41,57 @@
                     mode: 'no-cors',
                     body: JSON.stringify({ action: 'add', email: email, typ: typ })
                 });
-                setView('dashboard');
             };
 
             if (view === 'login') {
                 return (
                     <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-                        <h1 className="text-4xl font-black text-orange-500 mb-4">TEAM MANAGER</h1>
-                        <p className="text-zinc-400 mb-8">Login mit E-Mail</p>
+                        <h1 className="text-5xl font-black text-red-custom mb-2 italic">TEAM ISIK</h1>
+                        <p className="text-zinc-500 text-sm mb-8 tracking-widest uppercase">Management Panel</p>
+                        
+                        <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 mb-8 max-w-xs">
+                            <p className="text-zinc-300 italic text-sm">
+                                „TEAM- Together Everyone Achieves More“
+                            </p>
+                            <p className="text-zinc-500 text-xs mt-2">– Unbekannt</p>
+                        </div>
+
                         <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
                             <input 
                                 type="email" 
-                                placeholder="E-Mail" 
-                                className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-800 outline-none focus:border-orange-500"
+                                placeholder="E-Mail Adresse" 
+                                className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-800 outline-none focus:border-red-custom transition-all"
                                 onChange={(e) => setEmail(e.target.value)}
                                 required 
                             />
-                            <button className="w-full bg-orange-500 text-black font-bold py-4 rounded-2xl">Anmelden</button>
+                            <button className="w-full bg-red-custom text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-900/20 active:scale-95 transition-transform">
+                                Anmelden
+                            </button>
                         </form>
                     </div>
                 );
             }
 
             return (
-                <div className="p-6">
-                    <header className="mb-8">
-                        <p className="text-zinc-500">Willkommen,</p>
+                <div className="p-6 max-w-md mx-auto">
+                    <header className="mb-10 pt-4 text-center">
+                        <p className="text-zinc-500 text-sm uppercase tracking-widest mb-1">TEAM ISIK</p>
                         <h2 className="text-2xl font-bold">{email.split('@')[0]}</h2>
+                        <div className="h-1 w-12 bg-red-custom mx-auto mt-2 rounded-full"></div>
                     </header>
 
-                    <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="grid grid-cols-2 gap-4 mb-10">
                         <div className="bg-zinc-900 p-6 rounded-[32px] border border-zinc-800 text-center">
-                            <p className="text-zinc-400 text-xs mb-2 uppercase">Urlaub</p>
-                            <span className="text-4xl font-black text-orange-500">{user.resturlaub}</span>
+                            <p className="text-zinc-500 text-xs mb-1 uppercase font-bold">Urlaub</p>
+                            <span className="text-4xl font-black text-red-custom">24</span>
                         </div>
                         <div className="bg-zinc-900 p-6 rounded-[32px] border border-zinc-800 text-center">
-                            <p className="text-zinc-400 text-xs mb-2 uppercase">Krank</p>
-                            <span className="text-4xl font-black">{user.kranktage}</span>
+                            <p className="text-zinc-500 text-xs mb-1 uppercase font-bold">Krank</p>
+                            <span className="text-4xl font-black text-white">0</span>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <button onClick={() => sendData('Urlaub')} className="w-full bg-orange-500 p-5 rounded-2xl text-black font-bold flex justify-between items-center">
-                            Urlaub beantragen ➔
+                        <button onClick={() => sendData('Urlaub')} className="w-full bg-red-custom p-5 rounded-2xl text-white font-black flex justify-between items-center active:scale-95 transition-all shadow-lg shadow-red-900/20">
+                            URLAUB BEANTRAGEN <span className="text-xl">→</span>
                         </button>
-                        <button onClick={() => sendData('Krank')} className="w-full bg-zinc-900 p-5 rounded-2xl text-white font-bold border border-zinc-800 flex justify-between items-center">
-                            Krankmeldung ➔
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
