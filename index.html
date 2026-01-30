@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TeamManager SPA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: black;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <div id="root"></div>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+      }
+    }
+    </script>
+
+    <script type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+          Calendar, Thermometer, History, LogOut, Plus, 
+          CheckCircle2, Clock, XCircle, ChevronRight, Send 
+        } from 'lucide-react';
+
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2dzzspz7RUYpZ_pB-nHY48O2Q0q5-p6yuEzAb1ect3QnUqsHWICwyuzwiT7olmbMzcw/exec';
+
+        const App = () => {
+          const [view, setView] = useState('login');
+          const [user, setUser] = useState(null);
+          const [history, setHistory] = useState([]);
+          const [emailInput, setEmailInput] = useState('');
+          const [isSubmitting, setIsSubmitting] = useState(false);
+          const [formData, setFormData] = useState({ start: '', ende: '', kommentar: '' });
+
+          useEffect(() => {
+            const savedUser = localStorage.getItem('tm_user');
+            if (savedUser) {
+              const parsed = JSON.parse(savedUser);
+              setUser(parsed);
+              setView('dashboard');
+              loadHistory(parsed.email);
+            }
+          }, []);
+
+          const apiPost = async (payload) => {
+            try {
+              await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              return true;
+            } catch (e) {
+              return false;
+            }
+          };
+
+          const handleLogin = async (e) => {
+            e.preventDefault();
+            if (!emailInput.includes('@')) return;
+            setView('loading');
+            
+            // Simule edilmiş login (Google Sheets verisine göre düzenlenebilir)
+            const mockUser = {
+              email: emailInput,
+              name: emailInput.split('@')[0],
+              resturlaub: 30, 
+              kranktage: 0
+            };
+
+            setTimeout(() => {
+              setUser(mockUser);
+              localStorage.setItem('tm_user', JSON.stringify(mockUser));
+              setView('dashboard');
+              loadHistory(emailInput);
+            }, 1000);
+          };
+
+          const loadHistory = (email) => {
+            // Statik veri (Gerçek veri için Sheets GET metodunu kullanacağız)
+            setHistory([
+              { id: '1', typ: 'Urlaub', start: '2024-06-01', ende: '2024-06-10', kommentar: '', status: 'Offen', datum: '2024-05-10' }
+            ]);
+          };
+
+          const submitRequest = async (typ) => {
+            if (!formData.start || !formData.ende) return;
+            setIsSubmitting(true);
+            const success = await apiPost({
+              action: 'add',
+              email: user.email,
+              typ: typ,
+              start: formData.start,
+              ende: formData.ende,
+              kommentar: formData.kommentar
+            });
+
+            if (success) {
+              alert("Antrag gesendet!");
+              setView('dashboard');
+            }
+            setIsSubmitting(false);
+          };
+
+          if (view === 'loading') return <div className="min-h-screen bg-black flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div></div>;
+
+          if (view === 'login') return (
+            <div className="min-h-screen bg-black text-white p-6 flex flex-col justify-center items-center">
+              <h1 className="text-4xl font-bold text-orange-500 mb-8">TeamManager</h1>
+              <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
+                <input type="email" placeholder="E-Mail" className="w-full bg-zinc-900 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-orange-500" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} required />
+                <button type="submit" className="w-full bg-orange-500 text-black font-bold py-4 rounded-2xl">Anmelden</button>
+              </form>
+            </div>
+          );
+
+          return (
+            <div className="min-h-screen bg-black text-white p-6">
+              <header className="flex justify-between items-center mb-8">
+                <div><p className="text-zinc-500">Moin,</p><h2 className="text-xl font-bold">{user.name}</h2></div>
+                <button onClick={() => {localStorage.clear(); setView('login');}} className="p-2 bg-zinc-900 rounded-full"><LogOut size={20}/></button>
+              </header>
+
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-zinc-900 p-6 rounded-[32px] border border-zinc-800">
+                  <p className="text-zinc-400 text-xs uppercase">Resturlaub</p>
+                  <span className="text-4xl font-black text-orange-500">{user.resturlaub}</span>
+                </div>
+                <div className="bg-zinc-900 p-6 rounded-[32px] border border-zinc-800">
+                  <p className="text-zinc-400 text-xs uppercase">Kranktage</p>
+                  <span className="text-4xl font-black">{user.kranktage}</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <button onClick={() => setView('form_urlaub')} className="w-full bg-orange-500 p-4 rounded-2xl flex items-center justify-between text-black font-bold">
+                  <div className="flex items-center space-x-3"><Calendar size={24} /><span>Urlaub beantragen</span></div><ChevronRight size={20} />
+                </button>
+                <button onClick={() => setView('form_krank')} className="w-full bg-zinc-900 p-4 rounded-2xl flex items-center justify-between text-white font-bold border border-zinc-800">
+                  <div className="flex items-center space-x-3"><Thermometer size={24} className="text-orange-500" /><span>Krankmeldung</span></div><ChevronRight size={20} />
+                </button>
+              </div>
+
+              {(view === 'form_urlaub' || view === 'form_krank') && (
+                <div className="fixed inset-0 bg-black/95 p-8 z-50 flex flex-col justify-end">
+                   <div className="space-y-4 bg-zinc-900 p-6 rounded-t-3xl border-t border-zinc-800">
+                      <h2 className="text-2xl font-bold">{view === 'form_urlaub' ? 'Urlaub' : 'Krank'}</h2>
+                      <input type="date" className="w-full bg-black p-4 rounded-xl border border-zinc-800" onChange={(e) => setFormData({...formData, start: e.target.value})} />
+                      <input type="date" className="w-full bg-black p-4 rounded-xl border border-zinc-800" onChange={(e) => setFormData({...formData, ende: e.target.value})} />
+                      <button onClick={() => submitRequest(view === 'form_urlaub' ? 'Urlaub' : 'Krank')} className="w-full bg-orange-500 text-black font-bold py-4 rounded-xl">Senden</button>
+                      <button onClick={() => setView('dashboard')} className="w-full text-zinc-500 py-2">Abbrechen</button>
+                   </div>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
