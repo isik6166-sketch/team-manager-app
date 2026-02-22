@@ -129,8 +129,8 @@
     </div>
 
     <script>
-        // Sizin yeni verdiğiniz link
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGUu1N_e5CEqaDhd3J8rPVFdHYcHjxtIKHycyA3EJT749htHGD48GygBvDoSuA0Wkpiw/exec';
+        // En güncel URL buraya işlendi
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmFY6_HRRWitZh_mgjkzgQpQ4XCg98cmRfDurovWhJmiqhn_lJOS29_EJlyfg5OtL38Q/exec';
         const ADMIN_EMAIL = 'isik6166@hotmail.com';
         let currentUserEmail = "";
 
@@ -151,6 +151,8 @@
         async function fetchData() {
             try {
                 const res = await fetch(SCRIPT_URL);
+                if (!res.ok) throw new Error("HTTP-Fehler: " + res.status);
+                
                 const data = await res.json();
                 document.getElementById('main-loader').classList.add('hidden');
                 
@@ -177,9 +179,9 @@
                     </div>
                 `).join('');
             } catch (e) { 
-                console.error("Error:", e);
+                console.error("Fetch-Fehler:", e);
                 document.getElementById('user-display').innerText = "ERROR";
-                alert("Daten konnten nicht geladen werden.");
+                alert("Fehler beim Laden der Daten. Bitte prüfen Sie die Verbindung.");
             }
         }
 
