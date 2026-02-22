@@ -101,7 +101,7 @@
                 <span class="text-[10px] text-red-600 block mt-1 font-bold italic">Tage</span>
             </div>
             <div class="glass p-6 rounded-[32px] border-t border-white/5">
-                <span class="text-zinc-500 text-[10px] font-bold uppercase block mb-2">Vorjahr</span>
+                <span class="text-zinc-500 text-[10px] font-bold uppercase block mb-2">Übertrag</span>
                 <span id="val-prev" class="text-3xl font-black text-white/40 italic">--</span>
             </div>
             <div class="glass p-6 rounded-[32px] col-span-2 flex justify-between items-center border-l-4 border-zinc-800">
@@ -129,8 +129,8 @@
     </div>
 
     <script>
-        // Sizin yeni paylaştığınız SCRIPT_URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzjcwvEFfrIwFoC49UzHlyso7ARKdyYPiDjiJd8pyY1T2J1ByLcFacBBOmgn4HMhFMbWA/exec';
+        // Sizin yeni verdiğiniz link
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGUu1N_e5CEqaDhd3J8rPVFdHYcHjxtIKHycyA3EJT749htHGD48GygBvDoSuA0Wkpiw/exec';
         const ADMIN_EMAIL = 'isik6166@hotmail.com';
         let currentUserEmail = "";
 
@@ -179,6 +179,7 @@
             } catch (e) { 
                 console.error("Error:", e);
                 document.getElementById('user-display').innerText = "ERROR";
+                alert("Daten konnten nicht geladen werden.");
             }
         }
 
